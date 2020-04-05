@@ -15,36 +15,6 @@ const HomePage = () => {
     </Admin>
   )
 }
-// const authProvider =  (type: any, params: { username?: any; status?: any; }) => {
-//   // called when the user attempts to log in
-//   if (type === AUTH_LOGIN) {
-//     const { username } = params;
-//     localStorage.setItem("username", username);
-//     // accept all username/password combinations
-//     return Promise.resolve();
-//   }
-//   // called when the user clicks on the logout button
-//   if (type === AUTH_LOGOUT) {
-//     localStorage.removeItem("username");
-//     return Promise.resolve();
-//   }
-//   // called when the API returns an error
-//   if (type === AUTH_ERROR) {
-//     const { status } = params;
-//     if (status === 401 || status === 403) {
-//       localStorage.removeItem("username");
-//       return Promise.reject();
-//     }
-//     return Promise.resolve();
-//   }
-//   // called when the user navigates to a new location
-//   if (type === AUTH_CHECK) {
-//     return localStorage.getItem("username")
-//       ? Promise.resolve()
-//       : Promise.reject();
-//   }
-//   return Promise.reject("Unknown method");
-// };
 const authProvider = {
   login: async (params: {username:string,password:string}) =>  {
     const { username, password } = params;
@@ -55,18 +25,14 @@ const authProvider = {
     })
   },
   logout: () => {
-    console.log("退出!")
-    console.trace();
-    // return API.logout().then(data=>Promise.resolve()).catch(err=>Promise.reject(err))
+    return API.logout().then(data=>Promise.resolve()).catch(err=>Promise.reject(err))
   },
-  checkAuth: (params: any) => {
-    console.log("检测!",tokenCheck())
+  checkAuth: () => {
     return tokenCheck()
       ? Promise.resolve()
       : Promise.reject();
   },
   checkError: (error: any) => {
-    console.log("错误!")
     if (error === 401 || error === 403) {
       return Promise.reject();
     }
