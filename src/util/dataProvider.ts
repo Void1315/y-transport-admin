@@ -6,12 +6,13 @@ import {
   CREATE,
   UPDATE,
   DELETE,
+  DELETE_MANY,
   fetchUtils
   //@ts-ignore
 } from "react-admin";
 //@ts-ignore
 import { stringify } from "query-string";
-  
+import Fetch from './fetch'
 const API_URL = process.env.REACT_APP_HOST + 'api/admin';
   
 /**
@@ -27,7 +28,9 @@ const convertDataProviderRequestToHTTP = (type: any, resource: any, params: { pa
     const { field, order } = params.sort;
     const query = {
       sort: JSON.stringify([field, order]),
-      range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
+      page: page,
+      limit: perPage,
+      //   range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
       filter: JSON.stringify(params.filter)
     };
     return { url: `${API_URL}/${resource}?${stringify(query)}` };
@@ -53,18 +56,23 @@ const convertDataProviderRequestToHTTP = (type: any, resource: any, params: { pa
   case UPDATE:
     return {
       url: `${API_URL}/${resource}/${params.id}`,
-      options: { method: "PUT", body: JSON.stringify(params.data) }
+      options: { method: "PUT", data: JSON.stringify(params.data) }
     };
   case CREATE:
     return {
       url: `${API_URL}/${resource}`,
-      options: { method: "POST", body: JSON.stringify(params.data) }
+      options: { method: "POST", data: JSON.stringify(params.data) }
     };
   case DELETE:
     return {
       url: `${API_URL}/${resource}/${params.id}`,
       options: { method: "DELETE" }
     };
+  case DELETE_MANY:
+    return {
+      url: `${API_URL}/${resource}/delete`,
+      options: { method: "POST",data: JSON.stringify(params.ids) }
+    };  
   default:
     throw new Error(`Unsupported fetch action type ${type}`);
   }
@@ -78,22 +86,23 @@ const convertDataProviderRequestToHTTP = (type: any, resource: any, params: { pa
    * @returns {Object} Data Provider response
    */
 const convertHTTPResponseToDataProvider = (
-  response: { headers: any; json: any; },
+  response: { headers: any; data: any; },
   type: any,
   resource: any,
   params: { data: any; }
 ) => {
-  const { json } = response;
+  
+  const { data } = response;
   switch (type) {
   case GET_LIST:
     return {
-      data: json.data.data.map((x: any) => x),
-      total:parseInt(json.data.total),
+      data: data.data.data.map((x: any) => x),
+      total:parseInt(data.data.total),
     };
   case CREATE:
-    return { data: { ...params.data, id: json.id } };
+    return { data: { ...params.data, id: data.data.id } };
   default:
-    return { data: json };
+    return { data:data.data };
   }
 };
   
@@ -110,7 +119,8 @@ export default (type: any, resource: any, params: any) => {
     resource,
     params
   );
-  return fetchJson(url, options).then((response: any) =>
+  //@ts-ignore
+  return Fetch({url, ...options}).then((response: any) =>
     convertHTTPResponseToDataProvider(response, type, resource, params)
   );
 };

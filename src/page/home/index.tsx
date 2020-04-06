@@ -3,16 +3,15 @@ import React from 'react'
 import API from '../../util/apis'
 import {tokenCheck} from '../../util/token'
 // @ts-ignore
-import { Admin,Resource,AUTH_LOGIN, AUTH_LOGOUT, AUTH_ERROR, AUTH_CHECK } from "react-admin";
-import RouteCompoent from '../../components/route'
-import jsonServerProvider from "ra-data-json-server";
+import { Admin,Resource } from "react-admin";
+import {ListCompoent,ShowCompoent,CreateCompoent,EditCompoent} from '../../components/route'
 import dataProvider from '../../util/dataProvider'
-// const dataProvider = jsonServerProvider('https://jsonplaceholder.typicode.com');
+import {Map} from "@material-ui/icons";
 const HomePage = () => {
   return (
-    <Admin authProvider={authProvider} dataProvider={dataProvider}>
-      <Resource name="routes_data" list={RouteCompoent} />
-      <Resource name="posts" list={RouteCompoent} />
+    <Admin authProvider={authProvider} dataProvider={dataProvider} title="My Custom Admin">
+      <Resource options={{ label: '路线' }} name="routes_data" list={ListCompoent} show={ShowCompoent} create={CreateCompoent}  icon={Map} />
+      {/* <Resource name="posts" list={ListCompoent} /> */}
       {/* <Route exact path={`${path}route`} component={RouteCompoent}/> */}
     </Admin>
   )
