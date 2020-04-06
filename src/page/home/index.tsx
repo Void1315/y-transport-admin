@@ -6,10 +6,12 @@ import {tokenCheck} from '../../util/token'
 import { Admin,Resource,AUTH_LOGIN, AUTH_LOGOUT, AUTH_ERROR, AUTH_CHECK } from "react-admin";
 import RouteCompoent from '../../components/route'
 import jsonServerProvider from "ra-data-json-server";
-const dataProvider = jsonServerProvider("http://jsonplaceholder.typicode.com");
+import dataProvider from '../../util/dataProvider'
+// const dataProvider = jsonServerProvider('https://jsonplaceholder.typicode.com');
 const HomePage = () => {
   return (
     <Admin authProvider={authProvider} dataProvider={dataProvider}>
+      <Resource name="routes_data" list={RouteCompoent} />
       <Resource name="posts" list={RouteCompoent} />
       {/* <Route exact path={`${path}route`} component={RouteCompoent}/> */}
     </Admin>

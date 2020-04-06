@@ -7,7 +7,6 @@ const RouteCompoent = (props: JSX.IntrinsicAttributes) => {
       <Datagrid>
         <TextField source="id" />
         <TextField source="title" />
-        <TextField source="body" />
       </Datagrid>
     </List>
   )
