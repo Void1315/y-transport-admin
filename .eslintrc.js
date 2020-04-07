@@ -5,7 +5,7 @@ module.exports = {
         "browser": true
     },
     globals: {
-        AMap: true
+        "AMap": true
     },
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint', 'react'],
