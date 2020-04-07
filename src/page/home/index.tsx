@@ -9,10 +9,8 @@ import dataProvider from '../../util/dataProvider'
 import {Map} from "@material-ui/icons";
 const HomePage = () => {
   return (
-    <Admin authProvider={authProvider} dataProvider={dataProvider} title="My Custom Admin">
-      <Resource options={{ label: '路线' }} name="routes_data" list={ListCompoent} show={ShowCompoent} create={CreateCompoent}  icon={Map} />
-      {/* <Resource name="posts" list={ListCompoent} /> */}
-      {/* <Route exact path={`${path}route`} component={RouteCompoent}/> */}
+    <Admin authProvider={authProvider} dataProvider={dataProvider}>
+      <Resource options={{ label: '路线' }} name="routes_data" edit={EditCompoent} list={ListCompoent} show={ShowCompoent} create={CreateCompoent}  icon={Map} />
     </Admin>
   )
 }

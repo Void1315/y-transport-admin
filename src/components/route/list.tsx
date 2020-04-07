@@ -1,12 +1,16 @@
 import React from 'react'
 //@ts-ignore
-import { List, Datagrid, TextField,TextInput,ReferenceInput,SelectInput,Filter } from "react-admin";
+import { List, Datagrid,DateField, TextField,TextInput,EditButton,ShowButton,Filter,DeleteButton } from "react-admin";
 export const ListCompoent = (props: JSX.IntrinsicAttributes) => {
   return (
     <List {...props} filters={<MyFilter />}>
       <Datagrid>
-        <TextField source="id" />
-        <TextField source="path_json" />
+        <TextField source="id" label="序号" />
+        <TextField source="path_json" label="路径点" />
+        <DateField source="created_at" label="创建日期" />
+        <EditButton />
+        <ShowButton />
+        <DeleteButton />
       </Datagrid>
     </List>
   )
@@ -15,8 +19,5 @@ export const ListCompoent = (props: JSX.IntrinsicAttributes) => {
 const MyFilter = (props: any) => (
   <Filter {...props}>
     <TextInput label="Search" source="path_json" alwaysOn />
-    <ReferenceInput label="User" source="userId" reference="users" allowEmpty>
-      <SelectInput optionText="name" />
-    </ReferenceInput>
   </Filter>
 );

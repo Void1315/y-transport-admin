@@ -49,6 +49,7 @@
     "ra-data-json-server": "^3.4.0",
     "react": "^16.13.1",
     "react-admin": "^3.4.0",
+    "react-amap": "^1.2.8",
     "react-app-polyfill": "^1.0.6",
     "react-dev-utils": "^10.2.1",
     "react-dom": "^16.13.1",

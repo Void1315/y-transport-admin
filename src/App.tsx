@@ -7,11 +7,12 @@ import {
 import Home from './page/home'
 const App: React.FC = () => {
   return (
-    <HashRouter>
-      <Switch>
-        <Route path="/" component={Home} />
-      </Switch>
-    </HashRouter>
+    <Home />
+    // <HashRouter>
+    //   <Switch>
+    //     <Route path="/" component={Home} />
+    //   </Switch>
+    // </HashRouter>
   )
 }
 

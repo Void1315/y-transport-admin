@@ -6,8 +6,7 @@ import {
   CREATE,
   UPDATE,
   DELETE,
-  DELETE_MANY,
-  fetchUtils
+  DELETE_MANY
   //@ts-ignore
 } from "react-admin";
 //@ts-ignore
@@ -48,7 +47,7 @@ const convertDataProviderRequestToHTTP = (type: any, resource: any, params: { pa
     const { field, order } = params.sort;
     const query = {
       sort: JSON.stringify([field, order]),
-      range: JSON.stringify([(page - 1) * perPage, page * perPage - 1]),
+      range: JSON.stringify([(page ) * perPage, page * perPage]),
       filter: JSON.stringify({ ...params.filter, [params.target]: params.id })
     };
     return { url: `${API_URL}/${resource}?${stringify(query)}` };
@@ -61,7 +60,7 @@ const convertDataProviderRequestToHTTP = (type: any, resource: any, params: { pa
   case CREATE:
     return {
       url: `${API_URL}/${resource}`,
-      options: { method: "POST", data: JSON.stringify(params.data) }
+      options: { method: "POST", data:params.data }
     };
   case DELETE:
     return {
@@ -113,7 +112,6 @@ const convertHTTPResponseToDataProvider = (
    * @returns {Promise} the Promise for response
    */
 export default (type: any, resource: any, params: any) => {
-  const { fetchJson } = fetchUtils;
   const { url, options } = convertDataProviderRequestToHTTP(
     type,
     resource,
