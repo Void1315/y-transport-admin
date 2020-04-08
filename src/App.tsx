@@ -4,15 +4,19 @@ import {
   Switch,
   Route,
 } from "react-router-dom";
+import { SnackbarProvider } from 'notistack';
 import Home from './page/home'
 const App: React.FC = () => {
   return (
-    <Home />
-    // <HashRouter>
-    //   <Switch>
-    //     <Route path="/" component={Home} />
-    //   </Switch>
-    // </HashRouter>
+    <SnackbarProvider maxSnack={3}>
+      <Home />
+    </SnackbarProvider>
+    
+  // <HashRouter>
+  //   <Switch>
+  //     <Route path="/" component={Home} />
+  //   </Switch>
+  // </HashRouter>
   )
 }
 
