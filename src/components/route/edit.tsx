@@ -3,7 +3,8 @@ import React from 'react'
 import { required, Edit, SimpleForm, TextInput } from 'react-admin';
 import {Map} from 'react-amap'
 import { makeStyles } from '@material-ui/core/styles';
-import {TextField as MTextField, Button} from '@material-ui/core'
+import {Add,Delete,Search} from '@material-ui/icons';
+import {TextField as MTextField, IconButton, Button} from '@material-ui/core'
 import style from './styles'
 import Autocomplete,{createFilterOptions} from '@material-ui/lab/Autocomplete';
 import { useSnackbar } from 'notistack';
@@ -27,6 +28,14 @@ const EditCompoent = (props: any) => {
   let pathPoint:Array<Array<Number>> = [[]]
   const [endAutoComplete,setEndAutoComplete] = React.useState<any>(null);
   const [startAutoComplete,setStartAutoComplete] = React.useState<any>(null);
+
+  const [pathJson,setPathJson] = React.useState([
+    { id:0,keyword: '北京市地震局（公交站）',city:'北京' },
+    { id:1,keyword: '亦庄文化园（地铁站）',city:'北京' },
+    // { id:2,keyword: '2亦庄文化园（地铁站）',city:'北京' },
+    // { id:3,keyword: '3亦庄文化园（地铁站）',city:'北京' },
+    // { id:4,keyword: '4亦庄文化园（地铁站）',city:'北京' },
+  ])
   const searchPath = (AMap:any) => {
     if(routeMap&&routeMap.search){
       if(startPoint){
@@ -36,7 +45,7 @@ const EditCompoent = (props: any) => {
       if(endPoint){
         pathPoint[1] = [endPoint.location.R,endPoint.location.Q]
       }
-      setupDragRoute(map,AMap,pathPoint)
+      // setupDragRoute(map,AMap,pathPoint)
 
     }
   }
@@ -45,6 +54,7 @@ const EditCompoent = (props: any) => {
   },[startPoint,endPoint])
   React.useEffect(()=>{
     if(map && AMap){
+      console.log('set Map')
       setupDragRoute(map,AMap)
       AMap.plugin('AMap.Autocomplete',()=>{
         let autoOptions = {
@@ -66,15 +76,13 @@ const EditCompoent = (props: any) => {
    * @param AMap 
    */
   const setupDragRoute = (map: any,AMap:any,pathList:Array<any> = pathPoint) => {
-    routeMap&&routeMap.destroy()
-    AMap.plugin(["AMap.DragRoute"],()=>{
-      let r = new AMap.DragRoute(map, pathList, AMap.DrivingPolicy.LEAST_FEE)
-      setRouteMap(r)
-      AMap.event.addListener(r,'complete',(type: any,target: any,data: any)=>{
-        console.log(type,target,data)
+    // routeMap&&routeMap.destroy()
+    AMap.plugin(["AMap.Driving"],()=>{
+      let r = new AMap.Driving({
+        policy: AMap.DrivingPolicy.LEAST_TIME,
+        map,
       })
-      console.log(pathList)
-      r.search()
+      setRouteMap(r)
     });
   }
   const checkLocation = (location:any):boolean=>{
@@ -94,18 +102,19 @@ const EditCompoent = (props: any) => {
     click: () => {console.log('You Clicked The Map')}
   }
 
-  const debounceStartChange = (e:any) => {
-    e.persist()
-    setStartLoading(true)
-    changeStart(e)
-  }
+
   const debounceEndChange = (e:any) => {
     e.persist()
     setEndLoading(true)
     changeEnd(e)
   }
+  const debounceStartChange = (e:any) => {
+    e.persist()
+    setStartLoading(true)
+    changeStart(e)
+  }
   const changeStart = debounce((e: any) => {
-    setStartValue(e.target.value)
+    // setStartValue(e.target.value)
     startAutoComplete.search(e.target.value,(status: string, result: any)=> {
       // 搜索成功时，result即是对应的匹配数据
       if(status === "complete"){
@@ -113,7 +122,7 @@ const EditCompoent = (props: any) => {
       }else{
         console.log("error!")
       }
-      setEndLoading(false)
+      setStartLoading(false)
     })
   },500)
   const changeEnd = debounce((e:any) => {
@@ -134,29 +143,44 @@ const EditCompoent = (props: any) => {
   const filterStartOptions = createFilterOptions({
     stringify: (option:any) => startValue,
   });
+  const addPathInput = (index:number) => {
+    setPathJson([...pathJson.slice(0,index+1),{id:pathJson[pathJson.length - 1].id+1,keyword:'',city:''},...pathJson.slice(index+1)])
+  }
+  const deletePathInput = (index:number) => {
+    setPathJson([...pathJson.slice(0,index),...pathJson.slice(index+1)])
+  }
+  const onSelectOption = (e:any,val:any) => {
+    console.log(e,val)
+  }
   return (
     <Edit title={"asd"} {...props}>
       <SimpleForm submitOnEnter={false}>
         <TextInput label="Id" disabled source="id" />
         <TextInput source="path_json" validate={required()} />
-        <Button onClick={()=>{
-          routeMap&&routeMap.destroy()
-        }}>销毁</Button>
-        <Autocomplete
-          className={classes.autoComplete}
-          filterOptions={filterStartOptions}
-          id="start-auto"
-          options={options}
-          onChange={(e: any,val: any)=>{
-            val && checkLocation(val.location) && setStartPoint(val)
-            searchPath(AMap)
-            
+        {
+          pathJson.map((item,index)=>{
+            return <AutocompleteInput addVisible deleteVisible={index > 1} 
+              onAdd={()=>addPathInput(index)} onSelectOption={onSelectOption} onDelete={() => deletePathInput(index)} autoComplete={startAutoComplete} 
+              // onInputChange={debounceStartChange} 
+              key={item.id} id={index} defaultPath={item} />
+          })
+        }
+        <Button
+          style={{
+            marginBottom:20
           }}
-          getOptionLabel={(option:any) => `${option.district}-${option.name}`}
-          loading={startLoading}
-          renderInput={(params) => <MTextField {...params} value={startValue} onChange={debounceStartChange} label='查询起点' variant="outlined" />}
-        />
-        <Autocomplete
+          variant="contained"
+          color="secondary" 
+          onClick={()=>{
+            let _pathJson = [...pathJson]
+            console.log([_pathJson[0],_pathJson[1]])
+            routeMap&&routeMap.search(_pathJson)
+          }}
+          startIcon={< Search />}>
+          查询路径
+        </Button>
+        {/* <Autocomplete
+
           className={classes.autoComplete}
           filterOptions={filterEndOptions}
           id="end-auto"
@@ -168,13 +192,89 @@ const EditCompoent = (props: any) => {
           }}
           getOptionLabel={(option:any) => `${option.district}-${option.name}`}
           loading={endLoading}
-          renderInput={(params) => <MTextField {...params} value={endValue} onChange={debounceEndChange} label='查询终点' variant="outlined" />}
-        />
+          renderInput={(params) => <MTextField {...params} size="small" value={endValue} onChange={debounceEndChange} label='查询终点' variant="outlined" />}
+        /> */}
         <div className={classes.mapBox}>
           <Map  amapkey={"722458940738295f8c529ecd3037af98"}  version={"1.4.15"} events={events} />
         </div>
       </SimpleForm>
     </Edit>
+  )
+}
+interface IAutocompleteInputProps {
+  onInputChange?:(...args:any)=>any
+  onSelectOption?:(...args:any)=>any
+  id:number
+  defaultPath:{keyword:string,city:string}
+  onAdd:(...args:any)=>any
+  onDelete:(...args:any)=>any
+  addVisible?:boolean
+  deleteVisible?:boolean
+  autoComplete:any
+}
+const AutocompleteInput:React.FC<IAutocompleteInputProps> = ({onSelectOption,autoComplete,onDelete,addVisible = true,deleteVisible = true,onAdd,id,defaultPath,onInputChange}:IAutocompleteInputProps)=>{
+  const classes = useStyle();
+  const [value,setValue] = React.useState('')
+  const [loading,setLoading] = React.useState(true)
+  const [options,setOptions] = React.useState<any>([])
+  const filterStartOptions = createFilterOptions({
+    stringify: (option:any) => value,
+  });
+  const debounceChange = (e:any) => {
+    e.persist()
+    setLoading(true)
+    changeStart(e)
+  }
+  const changeStart = debounce((e: any) => {
+    setValue(e.target.value)
+    autoComplete.search(e.target.value,(status: string, result: any)=> {
+      // 搜索成功时，result即是对应的匹配数据
+      if(status === "complete"){
+        setOptions(result.tips)
+      }else{
+        console.log("error!")
+      }
+      setLoading(false)
+    })
+  },500)
+  return (
+    <div className={classes.autoCompleteAddBox}>
+      <Autocomplete
+        freeSolo
+        defaultValue={{
+          district:defaultPath.city,
+          name: defaultPath.keyword
+        }}
+        className={classes.autoComplete}
+        filterOptions={filterStartOptions}
+        id={`auto-${id}`}
+        options={options}
+        onChange={(e: any,val: any)=>{
+          console.log('change',e.target)
+          onSelectOption && onSelectOption(e,val)
+          // val && checkLocation(val.location) && setStartPoint(val)
+          // searchPath(AMap)
+        }}
+        getOptionLabel={(option:any) => `${option.district}-${option.name}`}
+        loading={loading}
+        renderInput={(params) => <MTextField value={value} {...params}  size="small" onChange={(e)=>{
+          setValue(e.target.value)
+          debounceChange(e)
+          onInputChange&&onInputChange(e)
+        }} label='查询路径点' variant="outlined" />}
+      />
+      {
+        addVisible &&<IconButton onClick={onAdd}>
+          <Add />
+        </IconButton>
+      }
+      {
+        deleteVisible && <IconButton onClick={onDelete}>
+          <Delete color="error" />
+        </IconButton>
+      }
+      
+    </div>
   )
 }
 export default EditCompoent;

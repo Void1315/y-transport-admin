@@ -16,6 +16,12 @@ export default createStyles({
     }
   },
   autoComplete:{
+    width: 256,
+  },
+  autoCompleteAddBox:{
+    width: 'auto',
+    display: 'flex',
+    alignItems: 'center',
     marginBottom: 20,
   }
 })
