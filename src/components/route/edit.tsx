@@ -11,39 +11,43 @@ import Autocomplete,{createFilterOptions} from '@material-ui/lab/Autocomplete';
 //@ts-ignore
 import debounce from 'lodash/debounce';
 const useStyle = makeStyles((theme: any) => style)
-const EditCompoent = (props: any) => {
+const EditCompoent:React.FC<any> = (props: any) => {
   const classes = useStyle();
   const dataProvider = useDataProvider()
+  const [pathJsonObject,setPathJsonObject] = React.useState<any>([
+    { id:-1,keyword: '北京市地震局（公交站）',city:'北京' },
+    { id:-2,keyword: '亦庄文化园（地铁站）',city:'北京' }
+  ])
   const [AMap,setAMap] = React.useState<any>(null) // AMap对象
   const [map,setMap] = React.useState<any>(null) // 地图本身对象
   const [routeMap,setRouteMap] = React.useState<any>(null)
   const [policy,setPolicy] = React.useState(2);
   const [mapLoadin,setMapLoading] = React.useState(true)
+  const [idLen,setIdLen] = React.useState(2)
   const [startAutoComplete,setStartAutoComplete] = React.useState<any>(null);
   const {
-    basePath, // deduced from the location, useful for action buttons
-    defaultTitle, // the translated title based on the resource, e.g. 'Post #123'
-    loaded, // boolean that is false until the record is available
-    loading, // boolean that is true on mount, and false once the record was fetched
     record, // record fetched via dataProvider.getOne() based on the id from the location
-    redirect, // the default redirection route. Defaults to 'list'
-    resource, // the resource name, deduced from the location. e.g. 'posts'
-    save, // the update callback, to be passed to the underlying form as submit handler
-    saving, // boolean that becomes true when the dataProvider is called to update the record
-    version, // integer used by the refresh feature
   } = useEditController(props);
   React.useEffect(()=>{
     if(record){
       setPolicy(record.type)
+      let _pathJson = JSON.parse(record.path_json)
+      setPathJsonObject(JSON.parse(record.path_json)) // 使用后台pathJson
+      let max = idLen;
+      for(let j = 0,len=_pathJson.length; j < len; j++) {
+        max = max > _pathJson[j].id?max:_pathJson[j].id;
+      }
+      setIdLen(max)
     }
   },[record])
-  const [pathJson,setPathJson] = React.useState([
-    { id:0,keyword: '北京市地震局（公交站）',city:'北京' },
-    { id:1,keyword: '亦庄文化园（地铁站）',city:'北京' },
-  ])
   React.useEffect(()=>{
     routeMap&&policy&&routeMap.setPolicy(policy)
   },[policy])
+  React.useEffect(()=>{
+    if(pathJsonObject.length&&routeMap){
+      routeMap.search([...pathJsonObject])
+    }
+  },[routeMap,pathJsonObject])
   React.useEffect(()=>{
     if(map && AMap){
       setupDragRoute(map,AMap)
@@ -64,7 +68,7 @@ const EditCompoent = (props: any) => {
   const setupDragRoute = (map: any,AMap:any) => {
     AMap.plugin(["AMap.Driving"],()=>{
       let r = new AMap.Driving({
-        policy: AMap.DrivingPolicy.LEAST_TIME,
+        policy,
         map,
       })
       setRouteMap(r)
@@ -80,25 +84,25 @@ const EditCompoent = (props: any) => {
   }
 
   const addPathInput = (index:number) => {
-    setPathJson([...pathJson.slice(0,index+1),{id:pathJson[pathJson.length - 1].id+1,keyword:'',city:''},...pathJson.slice(index+1)])
+    setPathJsonObject([...pathJsonObject.slice(0,index+1),{id:idLen+1,keyword:'',city:''},...pathJsonObject.slice(index+1)])
+    setIdLen(idLen+1)
   }
   const deletePathInput = (index:number) => {
-    setPathJson([...pathJson.slice(0,index),...pathJson.slice(index+1)])
+    setPathJsonObject([...pathJsonObject.slice(0,index),...pathJsonObject.slice(index+1)])
   }
   const onSelectOption = (e:any,val:any,index:number) => {
-    console.log(e,val)
-    val&&setPathJson([...pathJson.slice(0,index),{
-      id: pathJson[pathJson.length -1].id +1,
+    val&&setPathJsonObject([...pathJsonObject.slice(0,index),{
+      id: pathJsonObject[index].id,
       keyword: val.name,
       city:val.city
-    },...pathJson.slice(index+1)])
+    },...pathJsonObject.slice(index+1)])
   }
   const changeSave = (val:any) => {
     dataProvider.update('routes_data',{
       id:record.id,
       data:{
         ...val,
-        path_json:pathJson
+        path_json:pathJsonObject
       }
     }).then((res:any)=>{
       console.log(res)
@@ -128,19 +132,19 @@ const EditCompoent = (props: any) => {
           </Select>}
         </div>
         {
-          pathJson.map((item,index)=>{
+          pathJsonObject&&pathJsonObject.map((item: { id: number; keyword: string; city: string; },index: number)=>{
             return <AutocompleteInput 
               textLabel={(function(){
                 if(index === 0)
                   return '选择起点'
-                if(index === pathJson.length-1)
+                if(index === pathJsonObject.length-1)
                   return '选择终点'
                 return '选择经过路径点'
               })()}
               addVisible deleteVisible={index > 1} 
               onAdd={()=>addPathInput(index)} onSelectOption={(e:any,val:any)=>onSelectOption(e,val,index)} onDelete={() => deletePathInput(index)} autoComplete={startAutoComplete} 
               // onInputChange={debounceStartChange} 
-              key={item.id} id={index} defaultPath={item} />
+              key={item.id} id={item.id} defaultPath={item} />
           })
         }
         <Button
@@ -150,7 +154,7 @@ const EditCompoent = (props: any) => {
           variant="contained"
           color="secondary" 
           onClick={()=>{
-            let _pathJson = [...pathJson]
+            let _pathJson = [...pathJsonObject]
             routeMap&&routeMap.search(_pathJson)
           }}
           startIcon={< Search />}>
@@ -175,7 +179,7 @@ interface IAutocompleteInputProps {
   onInputChange?:(...args:any)=>any
   onSelectOption?:(...args:any)=>any
   id:number
-  defaultPath:{keyword:string,city:string}
+  defaultPath:{id:number,keyword:string,city:string}
   onAdd:(...args:any)=>any
   onDelete:(...args:any)=>any
   addVisible?:boolean
@@ -211,7 +215,6 @@ const AutocompleteInput:React.FC<IAutocompleteInputProps> = ({textLabel="查询�
       <Autocomplete
         freeSolo
         defaultValue={{
-          district:defaultPath.city,
           name: defaultPath.keyword
         }}
         className={classes.autoComplete}
@@ -221,7 +224,7 @@ const AutocompleteInput:React.FC<IAutocompleteInputProps> = ({textLabel="查询�
         onChange={(e: any,val: any)=>{
           onSelectOption && onSelectOption(e,val)
         }}
-        getOptionLabel={(option:any) => `${option.district}-${option.name}`}
+        getOptionLabel={(option:any) => `${option.name}`}
         loading={loading}
         renderInput={(params) => <MTextField value={value} {...params}  size="small" onChange={(e)=>{
           setValue(e.target.value)
@@ -251,7 +254,6 @@ const PostCreateToolbar:React.FC<IPostCreateToolbarProps> = ({onSave,...props}:I
     <SaveButton
       onSave={(val:any,redirect:any)=>{
         onSave && onSave(val,redirect)
-        console.log('save!',redirect,val)
       }}
       label="保存"
       redirect="show"

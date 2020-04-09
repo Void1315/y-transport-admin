@@ -7,17 +7,26 @@ export const ListCompoent = (props: JSX.IntrinsicAttributes) => {
       <Datagrid>
         <TextField source="id" label="序号" />
         <TextField source="name" label="路线名称" />
-        <TextField source="path_json" label="路径点" />
+        <RoutePathFormat source="path_json" label="路径点" />
         <DateField source="created_at" label="创建日期" />
         <TextField source="comment" label="路线说明" />
-        <EditButton />
-        <ShowButton />
-        <DeleteButton />
+        <EditButton label="编辑" />
+        <ShowButton label="查看详情"/>
+        <DeleteButton label="删除"/>
       </Datagrid>
     </List>
   )
 }
-
+const RoutePathFormat = (props:any) => {
+  let pathJson = JSON.parse(props.record.path_json)
+  return <span>
+    {pathJson.map((item: { keyword: any; },index:number)=>{
+      if(index === pathJson.length -1 )
+        return `${item.keyword}`
+      return `${item.keyword}->`
+    })}
+  </span>
+}
 const MyFilter = (props: any) => (
   <Filter {...props}>
     <TextInput label="Search" source="path_json" alwaysOn />
