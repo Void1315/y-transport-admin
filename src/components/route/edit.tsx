@@ -1,10 +1,10 @@
 import React from 'react'
 //@ts-ignore
-import { Edit, SimpleForm, TextInput,Toolbar,SaveButton,DeleteButton,useEditController } from 'react-admin';
+import { Edit, SimpleForm, TextInput,Toolbar,SaveButton,DeleteButton,useEditController,useDataProvider } from 'react-admin';
 import {Map} from 'react-amap'
 import { makeStyles } from '@material-ui/core/styles';
 import {Add,Delete,Search} from '@material-ui/icons';
-import {TextField as MTextField, IconButton, Button,Select,MenuItem} from '@material-ui/core'
+import {TextField as MTextField, IconButton, Button,Select,MenuItem, CircularProgress} from '@material-ui/core'
 import style from './styles'
 import Autocomplete,{createFilterOptions} from '@material-ui/lab/Autocomplete';
 // import { useSnackbar } from 'notistack';
@@ -13,11 +13,12 @@ import debounce from 'lodash/debounce';
 const useStyle = makeStyles((theme: any) => style)
 const EditCompoent = (props: any) => {
   const classes = useStyle();
+  const dataProvider = useDataProvider()
   const [AMap,setAMap] = React.useState<any>(null) // AMap对象
   const [map,setMap] = React.useState<any>(null) // 地图本身对象
   const [routeMap,setRouteMap] = React.useState<any>(null)
-  const [policy,setPolicy] = React.useState();
-  let pathPoint:Array<Array<Number>> = [[]]
+  const [policy,setPolicy] = React.useState(2);
+  const [mapLoadin,setMapLoading] = React.useState(true)
   const [startAutoComplete,setStartAutoComplete] = React.useState<any>(null);
   const {
     basePath, // deduced from the location, useful for action buttons
@@ -31,6 +32,11 @@ const EditCompoent = (props: any) => {
     saving, // boolean that becomes true when the dataProvider is called to update the record
     version, // integer used by the refresh feature
   } = useEditController(props);
+  React.useEffect(()=>{
+    if(record){
+      setPolicy(record.type)
+    }
+  },[record])
   const [pathJson,setPathJson] = React.useState([
     { id:0,keyword: '北京市地震局（公交站）',city:'北京' },
     { id:1,keyword: '亦庄文化园（地铁站）',city:'北京' },
@@ -41,7 +47,7 @@ const EditCompoent = (props: any) => {
   React.useEffect(()=>{
     if(map && AMap){
       setupDragRoute(map,AMap)
-      setPolicy(AMap.DrivingPolicy.LEAST_DISTANCE)
+      setMapLoading(false)
       AMap.plugin('AMap.Autocomplete',()=>{
         let autoOptions = {
           city: '全国',
@@ -55,10 +61,9 @@ const EditCompoent = (props: any) => {
    * @param map 
    * @param AMap 
    */
-  const setupDragRoute = (map: any,AMap:any,pathList:Array<any> = pathPoint) => {
+  const setupDragRoute = (map: any,AMap:any) => {
     AMap.plugin(["AMap.Driving"],()=>{
       let r = new AMap.Driving({
-        // policy: AMap.DrivingPolicy.LEAST_TIME,
         policy: AMap.DrivingPolicy.LEAST_TIME,
         map,
       })
@@ -87,16 +92,27 @@ const EditCompoent = (props: any) => {
       keyword: val.name,
       city:val.city
     },...pathJson.slice(index+1)])
-
+  }
+  const changeSave = (val:any) => {
+    dataProvider.update('routes_data',{
+      id:record.id,
+      data:{
+        ...val,
+        path_json:pathJson
+      }
+    }).then((res:any)=>{
+      console.log(res)
+    })
   }
   return (
     <Edit title={"asd"} {...props}>
-      <SimpleForm toolbar={<PostCreateToolbar />} redirect="show" submitOnEnter={false}>
+      <SimpleForm toolbar={<PostCreateToolbar onSave={changeSave} />} redirect="show" submitOnEnter={false}>
         <TextInput label="Id" disabled source="id" />
+        <TextInput label="路线名称" source="name" />
         <div style={{
           marginBottom:20
         }}>
-          {AMap && AMap.DrivingPolicy&&<Select
+          {<Select
             placeholder="选择行驶策略"
             labelId="选择行驶策略"
             fullWidth
@@ -105,13 +121,12 @@ const EditCompoent = (props: any) => {
               setPolicy(event.target.value)
             }}
           >
-            <MenuItem value={AMap.DrivingPolicy.LEAST_DISTANCE}>最短距离模式</MenuItem>
-            <MenuItem value={AMap.DrivingPolicy.LEAST_TIME}>最快捷模式</MenuItem>
-            <MenuItem value={AMap.DrivingPolicy.LEAST_FEE}>最经济模式</MenuItem>
-            <MenuItem value={AMap.DrivingPolicy.REAL_TRAFFIC}>考虑实时路况</MenuItem>
+            <MenuItem value={2}>最短距离模式</MenuItem>
+            <MenuItem value={0}>最快捷模式</MenuItem>
+            <MenuItem value={1}>最经济模式</MenuItem>
+            <MenuItem value={4}>考虑实时路况</MenuItem>
           </Select>}
         </div>
-        {/* <TextInput source="path_json" validate={required()} /> */}
         {
           pathJson.map((item,index)=>{
             return <AutocompleteInput 
@@ -136,15 +151,22 @@ const EditCompoent = (props: any) => {
           color="secondary" 
           onClick={()=>{
             let _pathJson = [...pathJson]
-            console.log([_pathJson[0],_pathJson[1]])
             routeMap&&routeMap.search(_pathJson)
           }}
           startIcon={< Search />}>
           查询路径
         </Button>
         <div className={classes.mapBox}>
+          {mapLoadin && <CircularProgress />}
           <Map  amapkey={"722458940738295f8c529ecd3037af98"}  version={"1.4.15"} events={events} />
         </div>
+        <TextInput
+          label="路线说明" 
+          source="comment"
+          multiline
+          rows="4"
+          variant="outlined"
+        />
       </SimpleForm>
     </Edit>
   )
@@ -221,10 +243,14 @@ const AutocompleteInput:React.FC<IAutocompleteInputProps> = ({textLabel="查询�
     </div>
   )
 }
-const PostCreateToolbar = (props: JSX.IntrinsicAttributes) => (
+interface IPostCreateToolbarProps extends JSX.IntrinsicAttributes{
+  onSave?:(...args:any)=>any
+}
+const PostCreateToolbar:React.FC<IPostCreateToolbarProps> = ({onSave,...props}:IPostCreateToolbarProps) => (
   <Toolbar {...props} >
     <SaveButton
       onSave={(val:any,redirect:any)=>{
+        onSave && onSave(val,redirect)
         console.log('save!',redirect,val)
       }}
       label="保存"
@@ -234,12 +260,6 @@ const PostCreateToolbar = (props: JSX.IntrinsicAttributes) => (
     <DeleteButton 
       label="删除"
     />
-    {/* <SaveButton
-      label="post.action.save_and_add"
-      redirect={false}
-      submitOnEnter={false}
-      variant="text"
-    /> */}
   </Toolbar>
 );
 export default EditCompoent;

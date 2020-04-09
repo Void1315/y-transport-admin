@@ -53,9 +53,10 @@ const convertDataProviderRequestToHTTP = (type: any, resource: any, params: { pa
     return { url: `${API_URL}/${resource}?${stringify(query)}` };
   }
   case UPDATE:
+    console.log(params)
     return {
-      url: `${API_URL}/${resource}/${params.id}`,
-      options: { method: "PUT", data: JSON.stringify(params.data) }
+      url: `${API_URL}/${resource}/edit/${params.id}`,
+      options: { method: "POST", data: params.data }
     };
   case CREATE:
     return {
