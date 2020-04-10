@@ -34,7 +34,6 @@ export const ShowCompoent = (props: JSX.IntrinsicAttributes) => {
         <TextField label="路线名称" source="name" />
         <TextField label="路线说明" multiline source="comment" />
         <TextField label="路线类型" source="type" />
-        <TextField source="path_json" />
         <DateField label="创建时间" source="created_at" />
         <DateField label="最后更新时间" source="updated_at" />
         <div className={classes.mapBox}>

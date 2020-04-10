@@ -53,7 +53,6 @@ const convertDataProviderRequestToHTTP = (type: any, resource: any, params: { pa
     return { url: `${API_URL}/${resource}?${stringify(query)}` };
   }
   case UPDATE:
-    console.log(params)
     return {
       url: `${API_URL}/${resource}/edit/${params.id}`,
       options: { method: "POST", data: params.data }
@@ -100,7 +99,7 @@ const convertHTTPResponseToDataProvider = (
       total:parseInt(data.data.total),
     };
   case CREATE:
-    return { data: { ...params.data, id: data.data.id } };
+    return { data: { ...params.data } };
   default:
     return { data:data.data };
   }

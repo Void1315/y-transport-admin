@@ -1,6 +1,6 @@
 import React from 'react'
 //@ts-ignore
-import { Create, SimpleForm, TextInput,Toolbar,SaveButton,DeleteButton,useDataProvider } from 'react-admin';
+import { Create, SimpleForm, TextInput,Toolbar,SaveButton,useNotify,useDataProvider } from 'react-admin';
 import {Map} from 'react-amap'
 import { makeStyles } from '@material-ui/core/styles';
 import {Add,Delete,Search} from '@material-ui/icons';
@@ -13,6 +13,7 @@ import debounce from 'lodash/debounce';
 const useStyle = makeStyles((theme: any) => style)
 const CreateCompoent:React.FC<any> = (props: any) => {
   const classes = useStyle();
+  const notify = useNotify();
   const dataProvider = useDataProvider()
   const [pathJsonObject,setPathJsonObject] = React.useState<any>([
     { id:-1,keyword: '北京市地震局（公交站）',city:'北京' },
@@ -98,11 +99,13 @@ const CreateCompoent:React.FC<any> = (props: any) => {
         type:policy
       }
     }).then((res:any)=>{
-      console.log(res)
+      notify('创建成功!')
+    }).catch((err:any)=>{
+      notify('创建错误:'+err,'warning')
     })
   }
   return (
-    <Create title={"asd"} {...props}>
+    <Create title={"路线管理"} {...props}>
       <SimpleForm validate={validateCreation} toolbar={<PostCreateToolbar onSave={changeSave} />} redirect="show" submitOnEnter={false}>
         <TextInput label="路线名称" source="name" />
         <div style={{
