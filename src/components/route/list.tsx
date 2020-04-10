@@ -29,6 +29,6 @@ const RoutePathFormat = (props:any) => {
 }
 const MyFilter = (props: any) => (
   <Filter {...props}>
-    <TextInput label="Search" source="path_json" alwaysOn />
+    <TextInput label="查询路线" source="name" alwaysOn />
   </Filter>
 );
