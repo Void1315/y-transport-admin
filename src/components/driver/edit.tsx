@@ -1,10 +1,13 @@
 import React from 'react'
 //@ts-ignore
-import { Edit ,ImageField,SimpleForm,TextInput,ImageInput,useDataProvider,useNotify,Toolbar,SaveButton} from 'react-admin';
+import { Edit ,ImageField,SimpleForm,TextInput,ImageInput,useDataProvider,useNotify,Toolbar,SaveButton,useEditController} from 'react-admin';
 import {convertFileToBase64} from '../../util/utils'
 const DriverEditCompoent:React.FC<any> = (props) => {
   const dataProvider = useDataProvider()
   const notify = useNotify();
+  const {
+    record, // record fetched via dataProvider.getOne() based on the id from the location
+  } = useEditController(props);
   const validateCreation = (values: any) => {
     const errors:any = {};
     if (!values.name) {
@@ -21,25 +24,43 @@ const DriverEditCompoent:React.FC<any> = (props) => {
     return errors
   };
   const changeSave = (val:any,redirect:any) => {
-    val&&val.image&&convertFileToBase64(val.image).then((res:any)=>{
-      console.log(res)
-      dataProvider.create('driver',{
+    if(val && val.image && val.image.rawFile){
+      convertFileToBase64(val.image).then((res:any)=>{
+      
+        dataProvider.update('driver',{
+          id:record.id,
+          data:{
+            ...val,
+            age: parseInt(val.age),
+            driving_age:parseInt(val.driving_age),
+            image:{
+              base64: res,
+              name: val.image.title,
+              type:/\.(\w+)$/.exec(val.image.title)![1]
+            }
+          }
+        }).then((res:any)=>{
+          notify('修改成功！')
+        }).catch((err:any)=>{
+          notify('修改失败:'+err,'warning')
+        })
+      })
+    }else{
+      delete val.image
+      dataProvider.update('driver',{
+        id:record.id,
         data:{
           ...val,
           age: parseInt(val.age),
           driving_age:parseInt(val.driving_age),
-          image:{
-            base64: res,
-            name: val.image.title,
-            type:/\.(\w+)$/.exec(val.image.title)![1]
-          }
         }
       }).then((res:any)=>{
-        notify('创建成功！')
+        notify('修改成功！')
       }).catch((err:any)=>{
-        notify('创建失败:'+err,'warning')
+        notify('修改失败:'+err,'warning')
       })
-    })
+    }
+
   }
   return (
     <Edit title={"编辑司机信息"} {...props}>
@@ -66,7 +87,7 @@ const PostCreateToolbar:React.FC<IPostCreateToolbarProps> = ({onSave,...props}:I
       onSave={(val:any,redirect:any)=>{
         onSave && onSave(val,redirect)
       }}
-      label="创建"
+      label="保存"
       redirect="show"
       submitOnEnter={false}
     />

@@ -95,7 +95,12 @@ const CreateCompoent:React.FC<any> = (props: any) => {
     dataProvider.create('routes_data',{
       data:{
         ...val,
-        path_json:JSON.stringify(pathJsonObject),
+        path_json:JSON.stringify(pathJsonObject.map((item:any)=>{
+          return {
+            ...item,
+            id: Math.abs(item.id) // 取绝对值
+          }
+        })),
         type:policy
       }
     }).then((res:any)=>{

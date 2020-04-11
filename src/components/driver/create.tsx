@@ -29,7 +29,7 @@ const DriverCreactCompoent:React.FC<any> = (props) => {
           age: parseInt(val.age),
           driving_age:parseInt(val.driving_age),
           image:{
-            base64: res,
+            base64: res.base64,
             name: val.image.title,
             type:/\.(\w+)$/.exec(val.image.title)![1]
           }
