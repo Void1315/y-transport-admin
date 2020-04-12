@@ -1,24 +1,32 @@
 import React from 'react'
 //@ts-ignore
-import { List, Datagrid,DateField, TextField,TextInput,EditButton,ShowButton,Filter,DeleteButton } from "react-admin";
+import { List, Datagrid,DateField, TextField,TextInput,SelectField,Filter } from "react-admin";
+import {OptionButtonGroup} from '../options'
+import {MAP_POLICY } from '../../util/config'
 export const ListCompoent = (props: JSX.IntrinsicAttributes) => {
   return (
     <List {...props} filters={<MyFilter />}>
       <Datagrid>
         <TextField source="id" label="序号" />
         <TextField source="name" label="路线名称" />
+        <SelectField label="路线类型" source="type" choices={Object.values(MAP_POLICY).map((item:string,index:number)=>{
+          return {id:index,name:item}
+        })} />
         <RoutePathFormat source="path_json" label="路径点" />
         <DateField source="created_at" label="创建日期" />
         <TextField source="comment" label="路线说明" />
-        <EditButton label="编辑" />
-        <ShowButton label="查看详情"/>
-        <DeleteButton label="删除"/>
+        <OptionButtonGroup source="routes_data" name="路线" label="操作" />
       </Datagrid>
     </List>
   )
 }
 const RoutePathFormat = (props:any) => {
-  let pathJson = JSON.parse(props.record.path_json)
+  let pathJson = []
+  try{
+    pathJson  = JSON.parse(props.record.path_json)
+  }catch{
+    pathJson=[]
+  }
   return <span>
     {pathJson.map((item: { keyword: any; },index:number)=>{
       if(index === pathJson.length -1 )

@@ -1,8 +1,9 @@
 import React from 'react';
 //@ts-ignore
-import { Show, SimpleShowLayout, TextField, DateField, EditButton, RichTextField,ListButton,DeleteButton,RefreshButton,useShowController  } from 'react-admin';
-import {Button,CardActions,CircularProgress} from '@material-ui/core';
+import { Show, SimpleShowLayout, TextField, DateField, EditButton, SelectField,ListButton,DeleteButton,RefreshButton,useShowController  } from 'react-admin';
+import {CardActions,CircularProgress} from '@material-ui/core';
 import {makeStyles} from '@material-ui/styles'
+import {MAP_POLICY} from '../../util/config/index'
 import style from './styles'
 import {useAMap} from '../../util/hook'
 const useStyle = makeStyles(style)
@@ -33,13 +34,14 @@ export const ShowCompoent = (props: JSX.IntrinsicAttributes) => {
         <TextField source="id" />
         <TextField label="路线名称" source="name" />
         <TextField label="路线说明" multiline source="comment" />
-        <TextField label="路线类型" source="type" />
+        <SelectField label="路线类型" source="type" choices={Object.values(MAP_POLICY).map((item:string,index:number)=>{
+          return {id:index,name:item}
+        })} />
         <DateField label="创建时间" source="created_at" />
         <DateField label="最后更新时间" source="updated_at" />
         <div className={classes.mapBox}>
           {mapLoading && <CircularProgress />}
           {mapEl}
-          {/* <Map amapkey={"722458940738295f8c529ecd3037af98"}  version={"1.4.15"} events={events} /> */}
         </div>
       </SimpleShowLayout>
     </Show>

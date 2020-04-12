@@ -51,6 +51,7 @@
     "postcss-preset-env": "6.7.0",
     "postcss-safe-parser": "4.0.1",
     "ra-data-json-server": "^3.4.0",
+    "ra-language-chinese": "^2.0.5",
     "react": "^16.13.1",
     "react-admin": "^3.4.0",
     "react-amap": "^1.2.8",

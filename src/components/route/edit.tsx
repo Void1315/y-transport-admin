@@ -152,7 +152,7 @@ const EditCompoent:React.FC<any> = (props: any) => {
             marginBottom:20
           }}
           variant="contained"
-          color="secondary" 
+          color="primary" 
           onClick={()=>{
             let _pathJson = [...pathJsonObject]
             routeMap&&routeMap.search(_pathJson)

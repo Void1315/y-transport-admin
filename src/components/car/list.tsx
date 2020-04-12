@@ -1,4 +1,5 @@
 import React from 'react'
+import {OptionButtonGroup} from '../options'
 //@ts-ignore
 import { List, Datagrid, TextField,TextInput,EditButton,ShowButton,Filter,DeleteButton } from "react-admin";
 const CarListCompoent:React.FC<any> = (props) => {
@@ -10,9 +11,7 @@ const CarListCompoent:React.FC<any> = (props) => {
         <TextField source="number" label="车牌号" />
         <TextField source="phone" label="车辆联系方式" />
         <TextField source="capacity" label="车辆最大载客量" />
-        <EditButton label="编辑" />
-        <ShowButton label="查看详情"/>
-        <DeleteButton label="删除"/>
+        <OptionButtonGroup label="操作" source="car" name="车辆" />
       </Datagrid>
     </List>
   )

@@ -8961,6 +8961,11 @@ ra-i18n-polyglot@^3.4.0:
     node-polyglot "^2.2.2"
     ra-core "^3.4.0"
 
+ra-language-chinese@^2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/ra-language-chinese/-/ra-language-chinese-2.0.5.tgz#51f029c1d1a18bb36c6608fd299587f29a511748"
+  integrity sha512-BwaqQWDNhQX/Ufe5Ki2GrJ3k5OGmH8dKrQn/npvRik80+tpN4Ew4vbyS8o4E74B4UfSJ8Sj10YdB0bA6FZnAOA==
+
 ra-language-english@^3.4.0:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/ra-language-english/-/ra-language-english-3.4.0.tgz#1296dd9bd632f175e71f885c9bdbc06379b49d5a"

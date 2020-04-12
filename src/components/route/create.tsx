@@ -91,7 +91,6 @@ const CreateCompoent:React.FC<any> = (props: any) => {
     return errors
   };
   const changeSave = (val:any) => {
-    // console.log({...val,path_json:pathJsonObject})
     dataProvider.create('routes_data',{
       data:{
         ...val,
@@ -151,7 +150,7 @@ const CreateCompoent:React.FC<any> = (props: any) => {
             marginBottom:20
           }}
           variant="contained"
-          color="secondary" 
+          color="primary"  
           onClick={()=>{
             let _pathJson = [...pathJsonObject]
             routeMap&&routeMap.search(_pathJson)
