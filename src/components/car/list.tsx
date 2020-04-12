@@ -6,6 +6,7 @@ const CarListCompoent:React.FC<any> = (props) => {
     <List title={"编辑车辆信息"} {...props} filters={<MyFilter />}>
       <Datagrid>
         <TextField source="id" label="序号" />
+        <TextField source="name" label="车辆名称" />
         <TextField source="number" label="车牌号" />
         <TextField source="phone" label="车辆联系方式" />
         <TextField source="capacity" label="车辆最大载客量" />

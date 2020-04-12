@@ -1,6 +1,6 @@
 import React from 'react'
 //@ts-ignore
-import { Edit ,ImageField,SimpleForm,TextInput,ImageInput,useDataProvider,useNotify,Toolbar,SaveButton,useEditController} from 'react-admin';
+import { Edit ,ImageField,SimpleForm,TextInput,ImageInput,SelectInput,useDataProvider,useNotify,Toolbar,SaveButton,useEditController} from 'react-admin';
 import {convertFileToBase64} from '../../util/utils'
 const DriverEditCompoent:React.FC<any> = (props) => {
   const dataProvider = useDataProvider()
@@ -8,6 +8,12 @@ const DriverEditCompoent:React.FC<any> = (props) => {
   const {
     record, // record fetched via dataProvider.getOne() based on the id from the location
   } = useEditController(props);
+  const [cars,setCars] = React.useState([])
+  React.useEffect(()=>{
+    dataProvider && dataProvider.all('car').then((res:any)=>{
+      setCars(res.data)
+    })
+  },[dataProvider])
   const validateCreation = (values: any) => {
     const errors:any = {};
     if (!values.name) {
@@ -70,6 +76,7 @@ const DriverEditCompoent:React.FC<any> = (props) => {
         <TextInput type="number" label="司机年龄" source="age" />
         <TextInput type="number" label="司机驾龄" source="driving_age" />
         <ImageField label="司机照片" source="image" title="司机照片" />
+        <SelectInput label="司机驾驶车辆" source="car_id" choices={cars} />
         <ImageInput source="image" maxSize={20000000} placeholder={<p>拖拽照片到此处</p>} label="修改司机照片" accept="image/*">
           <ImageField source="src" title="title" />
         </ImageInput>

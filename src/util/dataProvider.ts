@@ -72,6 +72,8 @@ const convertDataProviderRequestToHTTP = (type: any, resource: any, params: { pa
       url: `${API_URL}/${resource}/delete`,
       options: { method: "POST",data: JSON.stringify(params.ids) }
     };  
+  case 'all': // 获取所有 不分页
+    return { url: `${API_URL}/${resource}/all`, options: { method: "POST"}};
   default:
     throw new Error(`Unsupported fetch action type ${type}`);
   }

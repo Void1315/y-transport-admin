@@ -14,11 +14,13 @@ export function debounce(fn:(...args: any)=>void, wait:number) {
     }, wait)
   }
 }
-interface IconvertFileToBase64Props {
-  
-}
 export const convertFileToBase64 = (file:any) => new Promise((resolve, reject) => {
-  console.log(file)
+  if(!Object.keys(file).includes("rawFile")){
+    return resolve({
+      path:file.path,
+      file_name:file.file_name
+    })
+  }
   const reader = new FileReader();
   reader.readAsDataURL(file.rawFile);
 
