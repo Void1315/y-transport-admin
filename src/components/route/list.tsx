@@ -14,6 +14,7 @@ export const ListCompoent = (props: JSX.IntrinsicAttributes) => {
         })} />
         <RoutePathFormat source="path_json" label="路径点" />
         <DateField source="created_at" label="创建日期" />
+        <DateField source="updated_at" label="修改日期" />
         <TextField source="comment" label="路线说明" />
         <OptionButtonGroup source="routes_data" name="路线" label="操作" />
       </Datagrid>

@@ -1,7 +1,7 @@
 import React from 'react'
 import {OptionButtonGroup} from '../options'
 //@ts-ignore
-import { List, Datagrid, TextField,TextInput,EditButton,ShowButton,Filter,DeleteButton } from "react-admin";
+import { List, Datagrid, TextField,TextInput,EditButton,ShowButton,Filter,DateField } from "react-admin";
 const DriverListCompoent:React.FC<any> = (props) => {
   return (
     <List {...props} filters={<MyFilter />}>
@@ -11,6 +11,8 @@ const DriverListCompoent:React.FC<any> = (props) => {
         <TextField source="age" label="司机年龄" />
         <TextField source="driving_age" label="司机驾龄" />
         <TextField source="phone" label="司机联系方式" />
+        <DateField source="created_at" label="创建日期" />
+        <DateField source="updated_at" label="修改日期" />
         <OptionButtonGroup source="driver" name="路线" label="操作" />
       </Datagrid>
     </List>

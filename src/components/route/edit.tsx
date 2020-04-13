@@ -1,7 +1,6 @@
 import React from 'react'
 //@ts-ignore
 import { Edit, SimpleForm, TextInput,Toolbar,SaveButton,DeleteButton,useEditController,useDataProvider } from 'react-admin';
-import {Map} from 'react-amap'
 import { makeStyles } from '@material-ui/core/styles';
 import {Add,Delete,Search} from '@material-ui/icons';
 import {TextField as MTextField, OutlinedInput,IconButton, Button,Select,MenuItem, CircularProgress, InputAdornment} from '@material-ui/core'
