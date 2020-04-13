@@ -3,16 +3,19 @@ import React from 'react'
 import API from '../../util/apis'
 import {tokenCheck} from '../../util/token'
 //@ts-ignore
-import chineseMessages from 'ra-language-chinese';
+import chineseMessages from 'yhy-ra-language-chinese';
 // @ts-ignore
 import { Admin,Resource,AppBar,Layout } from "react-admin";
 import {ListCompoent,ShowCompoent,CreateCompoent,EditCompoent} from '../../components/route'
 import {DriverListCompoent,DriverCreactCompoent,DriverShowCompoent,DriverEditCompoent} from '../../components/driver'
 import {CarListCompoent,CarCreateCompoent,CarEditCompoent,CarShowCompoent } from '../../components/car'
 import dataProvider from '../../util/dataProvider'
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import zhLocale from "date-fns/locale/zh-CN";
+// import MomentUtils from '@date-io/moment';
+import DateFnsUtils from '@date-io/date-fns'; 
 import {Map,AirlineSeatReclineNormal,DirectionsBus} from "@material-ui/icons";
 import { createMuiTheme } from '@material-ui/core/styles';
-import {} from '@material-ui/styles';
 import polyglotI18nProvider from 'ra-i18n-polyglot';
 const i18nProvider = polyglotI18nProvider(() => chineseMessages, 'cn');
 const theme = createMuiTheme({
@@ -32,11 +35,13 @@ const MyLayout = (props:any) => <Layout
 />;
 const HomePage = () => {
   return (
-    <Admin i18nProvider={i18nProvider} layout={MyLayout} theme={theme} authProvider={authProvider} dataProvider={dataProvider}>
-      <Resource options={{ label: '路线' }} name="routes_data" edit={EditCompoent} list={ListCompoent} show={ShowCompoent} create={CreateCompoent}  icon={Map} />
-      <Resource options={{ label: '司机管理' }} show={DriverShowCompoent} edit={DriverEditCompoent} create={DriverCreactCompoent} name="driver" list={DriverListCompoent} icon={AirlineSeatReclineNormal} />
-      <Resource options={{ label: '车辆管理' }} show={CarShowCompoent} create={CarCreateCompoent} edit={CarEditCompoent} name="car" list={CarListCompoent} icon={DirectionsBus} />
-    </Admin>
+    <MuiPickersUtilsProvider locale={zhLocale} utils={DateFnsUtils}>
+      <Admin i18nProvider={i18nProvider} layout={MyLayout} theme={theme} authProvider={authProvider} dataProvider={dataProvider}>
+        <Resource options={{ label: '路线' }} name="routes_data" edit={EditCompoent} list={ListCompoent} show={ShowCompoent} create={CreateCompoent}  icon={Map} />
+        <Resource options={{ label: '司机管理' }} show={DriverShowCompoent} edit={DriverEditCompoent} create={DriverCreactCompoent} name="driver" list={DriverListCompoent} icon={AirlineSeatReclineNormal} />
+        <Resource options={{ label: '车辆管理' }} show={CarShowCompoent} create={CarCreateCompoent} edit={CarEditCompoent} name="car" list={CarListCompoent} icon={DirectionsBus} />
+      </Admin>
+    </MuiPickersUtilsProvider>
   )
 }
 const authProvider = {
