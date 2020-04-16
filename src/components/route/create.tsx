@@ -95,9 +95,9 @@ export const RouteForm:React.FC<IRouteFormProps> = ({postCreateToolbar:PostCreat
       let _pathJson = _.cloneDeep(pathJsonObject)
       const startPoint =  new AMap.LngLat(_pathJson[0].lng,_pathJson[0].lat) 
       const endPoint = new AMap.LngLat(_pathJson[_pathJson.length - 1].lng,_pathJson[_pathJson.length - 1].lat) 
-      const opts = _pathJson.slice(1,-1).map((item: { lng: any; lat: any; })=>{
+      const opts = {waypoints:_pathJson.slice(1,-1).map((item: { lng: any; lat: any; })=>{
         return new AMap.LngLat(item.lng,item.lat)
-      })
+      })}
       routeMap&&routeMap.search(startPoint,endPoint,opts)
     }
   }

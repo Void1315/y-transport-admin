@@ -4,7 +4,7 @@ import {OptionButtonGroup} from '../options'
 import { List, Datagrid, TextField,TextInput,EditButton,ShowButton,Filter,DateField } from "react-admin";
 const CarListCompoent:React.FC<any> = (props) => {
   return (
-    <List title={"编辑车辆信息"} {...props} filters={<MyFilter />}>
+    <List title={"车辆信息"} {...props} filters={<MyFilter />}>
       <Datagrid>
         <TextField source="id" label="序号" />
         <TextField source="name" label="车辆名称" />
