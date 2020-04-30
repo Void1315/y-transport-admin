@@ -20,22 +20,10 @@ const CreateCompoent:React.FC<any> = (props: any) => {
   const notify = useNotify();
   const dataProvider = useDataProvider()
   const [pathJsonObject,setPathJsonObject] = React.useState<any>([
-    { id:-1,keyword: '北京市地震局（公交站）',lng: 116.306007,lat: 39.979771,city:'北京',time:format(new Date(),'HH:mm'),district:'' },
-    { id:-2,keyword: '亦庄文化园（地铁站）',city:'北京', lng: 116.490632,lat: 39.80689,time:format(new Date(),'HH:mm'),district:'' }
+    { id:-1,keyword: '北京市地震局（公交站）',lng: 116.306007,lat: 39.979771,city:'北京',time:format(new Date(),'HH:mm'),district:'北京' },
+    { id:-2,keyword: '亦庄文化园（地铁站）',city:'北京', lng: 116.490632,lat: 39.80689,time:format(new Date(),'HH:mm'),district:'北京' }
   ])
-
-  const [routeMap,setRouteMap] = React.useState<any>(null)
-  const [policy,setPolicy] = React.useState(2);
-  React.useEffect(()=>{
-    routeMap&&policy&&routeMap.setPolicy(policy)
-  },[policy])
-  React.useEffect(()=>{
-    if(pathJsonObject.length&&routeMap){
-      routeMap.search([...pathJsonObject])
-    }
-  },[routeMap,pathJsonObject])
-
-
+  const [policy,setPolicy] = React.useState(2); // 行车策略 状态提升
   const changeSave = (val:any) => {
     dataProvider.create('routes_data',{
       data:{
@@ -56,26 +44,32 @@ const CreateCompoent:React.FC<any> = (props: any) => {
   }
   return (
     <Create title={"路线管理"} {...props}>
-      <RouteForm postCreateToolbar={PostCreateToolbar} pathJsonObject={pathJsonObject} setPathJsonObject={setPathJsonObject}  onSave={changeSave} {...props}/>
+      <RouteForm policy={policy} setPolicy={setPolicy} postCreateToolbar={PostCreateToolbar} pathJsonObject={pathJsonObject} setPathJsonObject={setPathJsonObject}  onSave={changeSave} {...props}/>
     </Create>
   )
 }
 interface IRouteFormProps{
   props:any
+  policy:number;
+  initIdLen:number;
+  setPolicy: React.Dispatch<React.SetStateAction<number>>;
   pathJsonObject?:any;
   setPathJsonObject:React.Dispatch<any>
   onSave:(...args:any)=>any
   postCreateToolbar:React.FC<any>
 }
-export const RouteForm:React.FC<IRouteFormProps> = ({postCreateToolbar:PostCreateToolbar,setPathJsonObject,pathJsonObject=[
+export const RouteForm:React.FC<IRouteFormProps> = ({initIdLen=2,postCreateToolbar:PostCreateToolbar,setPathJsonObject,pathJsonObject=[
   { id:-1,keyword: '北京市地震局（公交站）',lng: 116.306007,lat: 39.979771,city:'北京',time:format(new Date(),'HH:mm'),district:'北京' },
   { id:-2,keyword: '亦庄文化园（地铁站）',city:'北京', lng: 116.490632,lat: 39.80689,time:format(new Date(),'HH:mm'),district:'北京' }
-],onSave,...props}:IRouteFormProps) => {
-  const [policy,setPolicy] = React.useState(2);
-  const [idLen,setIdLen] = React.useState(2)
+],onSave,policy,setPolicy,...props}:IRouteFormProps) => {
+  const [idLen,setIdLen] = React.useState(initIdLen)
+  const notify = useNotify();
   const [routeMap,setRouteMap] = React.useState<any>(null)
   const [startAutoComplete,setStartAutoComplete] = React.useState<any>(null);
   const classes = useStyle();
+  React.useEffect(()=>{
+    setIdLen(initIdLen)
+  },[initIdLen])
   /**
    * 加载路径
    * @param map 
@@ -87,9 +81,19 @@ export const RouteForm:React.FC<IRouteFormProps> = ({postCreateToolbar:PostCreat
         policy,
         map,
       })
+      AMap.event.addListener(r,"complete",(err: any)=>{
+        notify('路线规划完成!')
+      })
+      AMap.event.addListener(r,"error",(err: any)=>{
+        // notify('路线规划出现了一些错误，请重试!','warning')
+        // console.log(err)
+      })
       setRouteMap(r)
     });
   }
+  React.useEffect(()=>{ // 策略变化
+    routeMap&&policy&&routeMap.setPolicy(policy)&&search()
+  },[policy])
   const search = () => {
     if(AMap&&routeMap){
       let _pathJson = _.cloneDeep(pathJsonObject)
@@ -126,6 +130,10 @@ export const RouteForm:React.FC<IRouteFormProps> = ({postCreateToolbar:PostCreat
     setPathJsonObject([...pathJsonObject.slice(0,index),...pathJsonObject.slice(index+1)])
   }
   const onSelectOption = (e:any,val:any,index:number) => {
+    if(val&&!val.id){
+      notify('您选择的不是确切地址，请重新选择!','warning')
+      return;
+    }
     val&&setPathJsonObject([...pathJsonObject.slice(0,index),{
       id: Math.abs(pathJsonObject[index].id),
       keyword: val.name,
@@ -189,7 +197,7 @@ export const RouteForm:React.FC<IRouteFormProps> = ({postCreateToolbar:PostCreat
             pathJsonObject={pathJsonObject}
             priceShow={index > 0}
             defaultTime={item.time}
-            addVisible deleteVisible={index > 1} 
+            addVisible deleteVisible={index > 1 || (pathJsonObject.length>2 && index > 0)} 
             onAdd={()=>addPathInput(index)} onSelectOption={(e:any,val:any)=>onSelectOption(e,val,index)} onDelete={() => deletePathInput(index)} autoComplete={startAutoComplete} 
             key={item.id} id={item.id} index={index} defaultPath={item} />
         })

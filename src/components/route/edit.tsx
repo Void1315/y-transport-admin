@@ -28,7 +28,6 @@ const EditCompoent:React.FC<any> = (props: any) => {
       setPolicy(record.type)
       let _pathJson = JSON.parse(record.path_json)
       setPathJsonObject(JSON.parse(record.path_json)) // 使用后台pathJson
-      console.log(JSON.parse(record.path_json))
       let max = idLen;
       for(let j = 0,len=_pathJson.length; j < len; j++) {
         max = max > _pathJson[j].id?max:_pathJson[j].id;
@@ -42,6 +41,7 @@ const EditCompoent:React.FC<any> = (props: any) => {
       id:record.id,
       data:{
         ...val,
+        type:policy,
         path_json:pathJsonObject
       }
     }).then((res:any)=>{
@@ -50,7 +50,7 @@ const EditCompoent:React.FC<any> = (props: any) => {
   }
   return (
     <Edit title={"编辑路线"} {...props}>
-      <RouteForm pathJsonObject={pathJsonObject} postCreateToolbar={PostCreateToolbar} setPathJsonObject={setPathJsonObject} onSave={changeSave} {...props} />
+      <RouteForm initIdLen={idLen} setPolicy={setPolicy} policy={policy} pathJsonObject={pathJsonObject} postCreateToolbar={PostCreateToolbar} setPathJsonObject={setPathJsonObject} onSave={changeSave} {...props} />
     </Edit>
   )
 }
