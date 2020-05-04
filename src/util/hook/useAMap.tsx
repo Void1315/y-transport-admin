@@ -13,6 +13,7 @@ const useAMap = ({created}:IuseAMapProps) => {
       setAMap(window.AMap)
       setMap(map)
       setLoading(false)
+      map.setMapStyle('amap://styles/whitesmoke');
       //@ts-ignore
       created&&created(map,window.AMap)
     }

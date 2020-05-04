@@ -18,7 +18,7 @@ import {Map,AirlineSeatReclineNormal,DirectionsBus,ConfirmationNumber,Descriptio
 import { createMuiTheme } from '@material-ui/core/styles';
 import polyglotI18nProvider from 'ra-i18n-polyglot';
 import {TripListCompoent,TripCreatCompoent,TripEditCompoent} from '../../components/trip'
-import {OrderListCompoent} from '../../components/order'
+import {OrderListCompoent,OrderShowCompoent} from '../../components/order'
 const i18nProvider = polyglotI18nProvider(() => chineseMessages, 'cn');
 const theme = createMuiTheme({
   palette: {
@@ -43,7 +43,7 @@ const HomePage = () => {
         <Resource options={{ label: '司机管理' }} show={DriverShowCompoent} edit={DriverEditCompoent} create={DriverCreactCompoent} name="driver" list={DriverListCompoent} icon={AirlineSeatReclineNormal} />
         <Resource options={{ label: '车辆管理' }} show={CarShowCompoent} create={CarCreateCompoent} edit={CarEditCompoent} name="car" list={CarListCompoent} icon={DirectionsBus} />
         <Resource options={{ label: '车次' }} list={TripListCompoent} edit={TripEditCompoent} create={TripCreatCompoent} name="trip" icon={ConfirmationNumber} />
-        <Resource options={{ label: '订单' }} list={OrderListCompoent} name="order" icon={Description} />
+        <Resource options={{ label: '订单' }} list={OrderListCompoent} name="order" show={OrderShowCompoent} icon={Description} />
       </Admin>
     </MuiPickersUtilsProvider>
   )
