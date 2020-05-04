@@ -19,6 +19,7 @@ import { createMuiTheme } from '@material-ui/core/styles';
 import polyglotI18nProvider from 'ra-i18n-polyglot';
 import {TripListCompoent,TripCreatCompoent,TripEditCompoent} from '../../components/trip'
 import {OrderListCompoent,OrderShowCompoent} from '../../components/order'
+import customRoutes from '../../customRoutes'
 const i18nProvider = polyglotI18nProvider(() => chineseMessages, 'cn');
 const theme = createMuiTheme({
   palette: {
@@ -38,7 +39,7 @@ const MyLayout = (props:any) => <Layout
 const HomePage = () => {
   return (
     <MuiPickersUtilsProvider locale={zhLocale} utils={DateFnsUtils}>
-      <Admin i18nProvider={i18nProvider} layout={MyLayout} theme={theme} authProvider={authProvider} dataProvider={dataProvider}>
+      <Admin customRoutes={customRoutes} i18nProvider={i18nProvider} layout={MyLayout} theme={theme} authProvider={authProvider} dataProvider={dataProvider}>
         <Resource options={{ label: '路线' }} name="routes_data" edit={EditCompoent} list={ListCompoent} show={ShowCompoent} create={CreateCompoent}  icon={Map} />
         <Resource options={{ label: '司机管理' }} show={DriverShowCompoent} edit={DriverEditCompoent} create={DriverCreactCompoent} name="driver" list={DriverListCompoent} icon={AirlineSeatReclineNormal} />
         <Resource options={{ label: '车辆管理' }} show={CarShowCompoent} create={CarCreateCompoent} edit={CarEditCompoent} name="car" list={CarListCompoent} icon={DirectionsBus} />
