@@ -9,9 +9,7 @@ export const ListCompoent = (props: JSX.IntrinsicAttributes) => {
       <Datagrid>
         <TextField source="id" label="序号" />
         <TextField source="name" label="路线名称" />
-        <SelectField label="路线类型" source="type" choices={Object.values(MAP_POLICY).map((item:string,index:number)=>{
-          return {id:index,name:item}
-        })} />
+        <SelectField label="路线类型" source="type" choices={MAP_POLICY} />
         <RoutePathFormat source="path_json" label="路径点" />
         <DateField source="created_at" label="创建日期" />
         <DateField source="updated_at" label="修改日期" />

@@ -6,6 +6,8 @@ import {makeStyles} from '@material-ui/styles'
 import {MAP_POLICY} from '../../util/config/index'
 import style from './styles'
 import {useAMap} from '../../util/hook'
+//@ts-ignore
+import _ from 'loadsh';
 const useStyle = makeStyles(style)
 export const ShowCompoent = (props: JSX.IntrinsicAttributes) => {
   const {record} = useShowController(props)
@@ -22,9 +24,15 @@ export const ShowCompoent = (props: JSX.IntrinsicAttributes) => {
 
   const {loading:mapLoading,el:mapEl,AMap,map} = useAMap({created:mapCreate})
   React.useEffect(()=>{
-    if(AMap&&record&&routerMap){
+    if(AMap&&record.path_json&&routerMap){
       routerMap.setPolicy(record.policy)
-      routerMap.search(JSON.parse(record.path_json))
+      let _pathJson = _.cloneDeep(JSON.parse(record.path_json))
+      const startPoint =  new AMap.LngLat(_pathJson[0].lng,_pathJson[0].lat) 
+      const endPoint = new AMap.LngLat(_pathJson[_pathJson.length - 1].lng,_pathJson[_pathJson.length - 1].lat) 
+      const opts = {waypoints:_pathJson.slice(1,-1).map((item: { lng: any; lat: any; })=>{
+        return new AMap.LngLat(item.lng,item.lat)
+      })}
+      routerMap&&routerMap.search(startPoint,endPoint,opts)
     }
   },[AMap,record,routerMap])
   return (
@@ -33,10 +41,8 @@ export const ShowCompoent = (props: JSX.IntrinsicAttributes) => {
       <SimpleShowLayout>
         <TextField source="id" />
         <TextField label="路线名称" source="name" />
-        <TextField label="路线说明" multiline source="comment" />
-        <SelectField label="路线类型" source="type" choices={Object.values(MAP_POLICY).map((item:string,index:number)=>{
-          return {id:index,name:item}
-        })} />
+        <TextField label="路线说明" multiline="true" source="comment" />
+        <SelectField label="路线类型" source="type" choices={MAP_POLICY} />
         <ShowRouteTable addLabel label="路线详情" record={record}/>
         <DateField label="创建时间" source="created_at" />
         <DateField label="最后更新时间" source="updated_at" />
@@ -68,7 +74,7 @@ const ShowRouteTable:React.FC<IShowRouteTableProps> = (props:IShowRouteTableProp
         </TableHead>
         <TableBody>
           {JSON.parse(props.record.path_json).map((item:any) => (
-            <TableRow key={item}>
+            <TableRow key={item.id}>
               <TableCell component="th" scope="row">
                 {item.id}
               </TableCell>
