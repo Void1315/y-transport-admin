@@ -1,5 +1,5 @@
-import React, { SyntheticEvent } from 'react'
-import {Container,Card,TextField,CircularProgress,Select,MenuItem,InputLabel,Button} from '@material-ui/core'
+import React from 'react'
+import {Container,Card,TextField,CircularProgress,Select,MenuItem,Grid,InputLabel,Button,Dialog,DialogActions,DialogContent,DialogContentText,DialogTitle} from '@material-ui/core'
 import {makeStyles} from '@material-ui/styles'
 import {Autocomplete} from '@material-ui/lab'
 //@ts-ignore
@@ -7,8 +7,13 @@ import { useDataProvider} from 'react-admin';
 //@ts-ignore
 import _ from 'loadsh';
 import Fetch from '../../util/fetch'
+import ArrowRightAltIcon from '@material-ui/icons/ArrowRightAlt';
 import {useAMap} from '../../util/hook';
 import style from './style'
+import parse from 'date-fns/parse'
+import compareAsc from 'date-fns/compareAsc'
+import format from 'date-fns/format'
+import add from 'date-fns/add'
 const useStyle = makeStyles(style)
 const UserPage = () => {
   const dataProvider = useDataProvider()
@@ -20,12 +25,14 @@ const UserPage = () => {
   const [endId,setEndId] = React.useState(0)
   const [tripList,setTripList] = React.useState([])
   const [tripError,setTripError] = React.useState(false)
-  const [tripTip,setTripTip] = React.useState('')
   const [startError,setStartError] = React.useState(false)
-  const [startTip,setStartTip] = React.useState('')
   const [endError,setEndError] = React.useState(false)
-  const [endTip,setEndTip] = React.useState('')
+  const [dialog,setDialog] = React.useState(false)
   const [selectTripId,setSelectTripId] = React.useState(0)
+  const [startName,setStartName] = React.useState('')
+  const [endName,setEndName] = React.useState('')
+  const [time,setTime] = React.useState('')
+  const [price,setPrice] = React.useState(0.0)
   const changeRouteId = (event: any,value:any) => {
     setSelectRoute(value)
   }
@@ -67,9 +74,23 @@ const UserPage = () => {
       setTripError(true)
       error = true;
     }
-    // if(!error){
-    //     Fetch.
-    // }
+    if(!error){
+      setDialog(true)
+      const data = JSON.parse(selectRoute.path_json)
+      const startData = data.filter((item: { id: number; })=>item.id === startId)[0]
+      const endData = data.filter((item: { id: number; })=>item.id === endId)[0]
+      setStartName(startData.keyword)
+      setEndName(endData.keyword)
+      const time = parse(startData.time,'HH:mm',new Date())
+      const timeStr = compareAsc(time,new Date())>0?format(time,'yyyy年 MM月 dd日 HH:mm'):format(add(time,{
+        days: 1,
+      }),'yyyy年 MM月 dd日 HH:mm')
+      setTime(timeStr)
+      setPrice(endData.price - (startData.price||0))
+    }
+  }
+  const handleClose = () => {
+    setDialog(false)
   }
   React.useEffect(()=>{
     dataProvider.all('routes_data').then((res:any)=>{
@@ -97,6 +118,21 @@ const UserPage = () => {
       console.log(err)
     })
   }
+  const handelBuy = () => {
+    dataProvider.create("order",{
+      data:{
+        start_id:startId,
+        end_id:endId
+      }
+    }).then((res:any)=>{
+      window.open(res.resData,"_blank");
+    }).catch((err:any)=>{
+
+    }).finally(()=>{
+      handleClose()
+    })
+    
+  }
   const SelectPoint = ({pathData,isStart=false,isEnd=false,value,error}:{error:boolean,value:number,pathData:any,isStart?:boolean,isEnd?:boolean}) => {
     let jump = isEnd && startId !=0;
     const changePoint = (e:any) => {
@@ -104,6 +140,7 @@ const UserPage = () => {
       if(isStart){setStartId(id);setStartError(false)}
       if(isEnd){setEndId(id);setEndError(false)}
     }
+
     return (
       <Select error={error} variant="outlined" value={value} onChange={changePoint} style={{ width: '100%' }}>
         {
@@ -123,6 +160,64 @@ const UserPage = () => {
 
   return (
     <Container className={classes.container}>
+      <Dialog fullWidth open={dialog} onClose={handleClose}>
+        <DialogTitle id="form-dialog-title">
+          确认订单
+        </DialogTitle>
+        <DialogContent>
+          {/* <DialogContentText> */}
+          <Grid container direction="column">
+            <Grid container alignItems="center">
+              <Grid container item  xs={5}>
+                <DialogContentText>出发地</DialogContentText>
+              </Grid>
+              <Grid container direction="column" item alignItems="center" justify="center" xs={2}>
+                <span>G81</span>
+                <ArrowRightAltIcon style={{transform: 'scale(6.5,1.0)'}}/>
+              </Grid>
+              <Grid container item justify="flex-end" xs={5}>
+                <DialogContentText>目的地</DialogContentText>
+              </Grid>
+            </Grid>
+            <Grid container alignItems="center">
+              <Grid container item justify="space-between"  xs={12}>
+                <span>{startName}</span>
+                <DialogContentText>{time} 开</DialogContentText>
+                <span>{endName}</span>
+              </Grid>
+            </Grid>
+            <Grid container justify="flex-end" alignItems="center">
+              <Grid container item justify="flex-end"  xs={2}>
+                <span style={{
+                  fontSize: 24,
+                  fontWeight: 'bold',
+                }}>单价</span>
+              
+              </Grid>
+              <Grid container item justify="flex-end" alignItems="center"  xs={2}>
+                <span style={
+                  {
+                    color: 'coral',
+                    fontSize: 20,
+                    fontWeight: 900,
+                    marginRight:8,
+                  }
+                }>{price}</span>
+                <span>元</span>
+              </Grid>
+            
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            关闭
+          </Button>
+          <Button onClick={handelBuy} color="primary">
+            立即下单
+          </Button>
+        </DialogActions>
+      </Dialog>
       <Card className={classes.card}>
         <div className={classes.mapBox}>
           {mapLoading && <CircularProgress />}

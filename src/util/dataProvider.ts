@@ -101,7 +101,7 @@ const convertHTTPResponseToDataProvider = (
       total:parseInt(data.data.total),
     };
   case CREATE:
-    return { data: { ...params.data } };
+    return { data: { ...params.data },resData:data.data };
   default:
     return { data:data.data };
   }
