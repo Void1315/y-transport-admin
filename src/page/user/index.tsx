@@ -121,6 +121,7 @@ const UserPage = () => {
   const handelBuy = () => {
     dataProvider.create("order",{
       data:{
+        trip_id: selectTripId,
         start_id:startId,
         end_id:endId
       }
